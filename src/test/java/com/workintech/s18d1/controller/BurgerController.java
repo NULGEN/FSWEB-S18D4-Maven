@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/workintech/burgers")
+@RequestMapping("/burger")
 @RequiredArgsConstructor
 @Slf4j
 public class BurgerController {
@@ -23,7 +23,7 @@ public class BurgerController {
     }
 
     @GetMapping("/{id}")
-    public Burger getById(@PathVariable long id) {
+    public Burger getById(@PathVariable Long id) {
         return burgerDao.findById(id);
     }
 
@@ -35,29 +35,29 @@ public class BurgerController {
     }
 
     @PutMapping("/{id}")
-    public Burger update(@PathVariable int id, @RequestBody Burger burger) {
+    public Burger update(@PathVariable Long id, @RequestBody Burger burger) {
         burger.setId(id);
         return burgerDao.update(burger);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable long id) {
+    public void delete(@PathVariable Long id) {
         burgerDao.remove(id);
     }
 
-    @GetMapping("/findByPrice")
-    public List<Burger> findByPrice(@RequestParam double price) {
+    @GetMapping("/price/{price}")
+    public List<Burger> findByPrice(@PathVariable double price) {
         return burgerDao.findByPrice(price);
     }
 
-    @GetMapping("/findByBreadType")
-    public List<Burger> findByBreadType(@RequestParam String breadType) {
+    @GetMapping("/breadType/{breadType}")
+    public List<Burger> findByBreadType(@PathVariable String breadType) {
         return burgerDao.findByBreadType(breadType);
     }
 
-    @GetMapping("/findByContent")
-    public List<Burger> findByContent(@RequestParam String content) {
+    @GetMapping("/content/{content}")
+    public List<Burger> findByContent(@PathVariable String content) {
         return burgerDao.findByContent(content);
     }
-
 }
+
