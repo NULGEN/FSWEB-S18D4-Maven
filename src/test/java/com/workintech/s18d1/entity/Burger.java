@@ -7,20 +7,27 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@Table(name= "burger", schema = "fsweb")
 public class Burger {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(name = "name")
     private String name;
-    private Double price;
-    private boolean vegan;
 
+    @Column(name = "price")
+    private Double price;
+
+    @Column(name = "is_vegan")
+    private Boolean isVegan;
+
+    @Column(name = "bread_type")
     @Enumerated(EnumType.STRING)
     private BreadType breadType;
 
+    @Column(name = "contents")
     private String contents;
 
 

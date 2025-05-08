@@ -60,7 +60,7 @@ class MainTest {
         burger.setId(1L);
         burger.setName("Vegan Delight");
         burger.setPrice(8.99);
-        burger.setVegan(true);
+        burger.setIsVegan(true);
         burger.setBreadType(BreadType.WRAP);
         burger.setContents("Lettuce, Tomato, Vegan Patty, Avocado");
 
@@ -68,7 +68,7 @@ class MainTest {
         assertEquals(1L, burger.getId());
         assertEquals("Vegan Delight", burger.getName());
         assertEquals(8.99, burger.getPrice());
-        assertEquals(true, burger.isVegan());
+        assertEquals(true, burger.getIsVegan());
         assertEquals(BreadType.WRAP, burger.getBreadType());
         assertEquals("Lettuce, Tomato, Vegan Patty, Avocado", burger.getContents());
     }
@@ -147,7 +147,7 @@ class MainTest {
         TypedQuery<Burger> query = mock(TypedQuery.class);
         when(entityManager.createQuery(anyString(), eq(Burger.class))).thenReturn(query);
         when(query.getResultList()).thenReturn(Arrays.asList(new Burger(), new Burger()));
-        List<Burger> burgers = burgerDao.findByBreadType(BreadType.BURGER.name());
+        List<Burger> burgers = burgerDao.findByBreadType(BreadType.BURGER);
         assertEquals(2, burgers.size());
     }
 
@@ -182,7 +182,7 @@ class MainTest {
 
 
         assertEquals(expectedMessage, exception.getMessage(), "The exception message should match the expected value.");
-        assertEquals(expectedStatus, exception.getStatus(), "The HttpStatus should match the expected value.");
+        assertEquals(expectedStatus, exception.getHttpStatus(), "The HttpStatus should match the expected value.");
     }
 
     @Test

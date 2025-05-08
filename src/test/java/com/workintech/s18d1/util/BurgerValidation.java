@@ -21,4 +21,7 @@ public class BurgerValidation {
             throw new BurgerException("Contents cannot be empty", HttpStatus.BAD_REQUEST);
         }
     }
+
+    public static void checkName(String name) {
+    }
 }

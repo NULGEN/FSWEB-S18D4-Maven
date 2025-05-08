@@ -1,9 +1,14 @@
 package com.workintech.s18d1.dao;
 
+import com.workintech.s18d1.entity.BreadType;
 import com.workintech.s18d1.entity.Burger;
-import com.workintech.s18d1.repository.BurgerRepository;
 import com.workintech.s18d1.exceptions.BurgerException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Transient;
+import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
@@ -13,75 +18,76 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
-@RequiredArgsConstructor
 public class BurgerDaoImpl implements BurgerDao {
 
-    private final BurgerRepository burgerRepository;
+    private final EntityManager entityManager;
 
     @Autowired
-    public BurgerDaoImpl(BurgerRepository burgerRepository) {
-        this.burgerRepository = burgerRepository;
+    public BurgerDaoImpl(EntityManager entityManager){
+        this.entityManager = entityManager;
     }
 
+    @Transactional
     @Override
     public Burger save(Burger burger) {
-        return burgerRepository.save(burger);
-    }
+        log.info("save started");
+        entityManager.persist(burger);
+        log.info("save ended");
 
-    @Override
-    public Burger findById(Long id) {
-        Optional<Burger> burgerOpt = burgerRepository.findById(id);
-        if (burgerOpt.isPresent()) {
-            return burgerOpt.get();
-        }
-        throw new BurgerException("Burger not found with id: " + id, HttpStatus.NOT_FOUND);
+        return burger;
     }
 
     @Override
     public List<Burger> findAll() {
-        return burgerRepository.findAll()
-                .stream()
-                .sorted(Comparator.comparing(Burger::getName))
-                .collect(Collectors.toList());
+     TypedQuery<Burger>  foundAll = entityManager.createQuery("SELECT b from Burger b", Burger.class);
+
+        return foundAll.getResultList();
     }
 
     @Override
-    public List<Burger> findByPrice(double price) {
-        return burgerRepository.findAll()
-                .stream()
-                .filter(b -> b.getPrice() == price)
-                .sorted(Comparator.comparing(Burger::getName))
-                .collect(Collectors.toList());
+    public Burger findById(long id) {
+       Burger burger =  entityManager.find(Burger.class, id);
+        if(burger == null){
+            throw  new BurgerException("Burger not found: "+ id, HttpStatus.NOT_FOUND);
+        }
+        return burger;
+    }
+
+    @Transactional
+    @Override
+    public Burger update(Burger burger) {
+
+
+        return entityManager.merge(burger);
     }
 
     @Override
-    public List<Burger> findByBreadType(String breadType) {
-        return burgerRepository.findAll()
-                .stream()
-                .filter(b -> b.getBreadType().name().equalsIgnoreCase(breadType))
-                .sorted(Comparator.comparing(Burger::getName))
-                .collect(Collectors.toList());
+    public Burger remove(long id) {
+        Burger found = findById(id);
+        entityManager.remove(found);
+        return found;
+    }
+
+    @Override
+    public List<Burger> findByPrice(Integer price) {
+       TypedQuery<Burger> query = entityManager.createQuery("SELECT b FROM Burger b WHERE b.price > :price ORDER BY b.price DESC", Burger.class);
+        query.setParameter("price", price);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Burger> findByBreadType(BreadType breadType) {
+       TypedQuery<Burger> query = entityManager.createQuery("SELECT b FROM Burger b WHERE b.breadType = :breadType ORDER BY b.name DESC", Burger.class);
+       query.setParameter("breadType", breadType);
+        return query.getResultList();
     }
 
     @Override
     public List<Burger> findByContent(String content) {
-        return burgerRepository.findAll()
-                .stream()
-                .filter(b -> b.getContents() != null && b.getContents().toLowerCase().contains(content.toLowerCase()))
-                .sorted(Comparator.comparing(Burger::getName))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Burger update(Burger burger) {
-        return burgerRepository.save(burger);
-    }
-
-    @Override
-    public Burger remove(Long id) {
-        Burger found = findById(id);
-        burgerRepository.delete(found);
-        return found;
+        TypedQuery<Burger> query =  entityManager.createQuery("SELECT b FROM Burger b WHERE b.contents LIKE CONCAT('%',:content,'%') ORDER BY b.name", Burger.class);
+        query.setParameter("content", content);
+        return query.getResultList();
     }
 }
